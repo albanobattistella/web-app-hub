@@ -247,8 +247,6 @@ impl IconPicker {
 
             if let Err(error) = self_clone.set_online_icons(force).await {
                 error!("{error:?}");
-                self_clone.set_no_icons();
-                return;
             }
 
             self_clone.reload_icons();
