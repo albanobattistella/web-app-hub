@@ -707,7 +707,7 @@ impl DesktopFile {
             })?
             .to_string();
         let url_path = url_object.path().to_string();
-        
+
         let browser = self.get_browser().ok_or(ValidationError {
             field: Keys::BrowserId,
             message: "Missing".to_string(),

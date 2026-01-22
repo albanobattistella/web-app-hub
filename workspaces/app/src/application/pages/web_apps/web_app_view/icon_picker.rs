@@ -4,11 +4,10 @@ use crate::application::App;
 use anyhow::{Context, Result, bail};
 use common::desktop_file::{DesktopFile, Icon};
 use gtk::{
-    self, Align, Button, ContentFit, FileDialog, FileFilter, FlowBox, FlowBoxChild, Label,
-    Orientation, Picture, SelectionMode,
+    self, Align, Button, ContentFit, FileDialog, FileFilter, FlowBox, Label, Orientation, Picture,
+    SelectionMode,
     gdk_pixbuf::Pixbuf,
     gio::prelude::FileExt,
-    glib::object::Cast,
     prelude::{BoxExt, ButtonExt, FlowBoxChildExt, ListBoxRowExt, WidgetExt},
 };
 use icon_fetcher::IconFetcher;
@@ -23,7 +22,7 @@ use std::{
     cell::RefCell,
     cmp::Reverse,
     collections::HashMap,
-    fs,
+    fs, mem,
     rc::Rc,
     time::{Duration, SystemTime},
 };
@@ -50,6 +49,7 @@ impl IconPicker {
     pub const DIALOG_CANCEL: &str = "cancel";
     /// In seconds
     pub const ONLINE_FETCH_THROTTLE: u64 = 20;
+    pub const CURRENT_ICON_KEY: &str = "current";
 
     pub fn new(app: &Rc<App>, desktop_file: &Rc<RefCell<DesktopFile>>) -> Rc<Self> {
         let icons = Rc::new(RefCell::new(HashMap::new()));
@@ -167,6 +167,7 @@ impl IconPicker {
 
     pub async fn save_first_icon_found(self: &Rc<Self>) -> Result<()> {
         self.set_online_icons(false).await?;
+        self.set_icons_ordered();
         let icons_ordered_borrow = self.icons_ordered.borrow();
 
         let Some((_url, icon)) = icons_ordered_borrow.first() else {
@@ -225,8 +226,8 @@ impl IconPicker {
     fn select_icon(&self, filename: &str) {
         let flow_box_borrow = self.pref_row_icons_flow_box.borrow();
         if let Some(flow_box) = flow_box_borrow.as_ref() {
-            let mut idx = 0;
-            while let Some(flow_box_child) = flow_box.child_at_index(idx) {
+            let mut index = 0;
+            while let Some(flow_box_child) = flow_box.child_at_index(index) {
                 if let Some(widget) = flow_box_child.child()
                     && filename == widget.widget_name()
                 {
@@ -234,7 +235,7 @@ impl IconPicker {
                     break;
                 }
 
-                idx += 1;
+                index += 1;
             }
         }
     }
@@ -248,22 +249,35 @@ impl IconPicker {
             if let Err(error) = self_clone.set_online_icons(force).await {
                 error!("{error:?}");
             }
-
-            self_clone.reload_icons();
+            if let Err(error) = self_clone.set_local_icon() {
+                error!("{error:?}");
+            }
+            self_clone.set_icons_ordered();
+            self_clone.reload_icon_flowbox();
         });
     }
 
-    fn reload_icons(self: &Rc<Self>) {
+    fn reload_icon_flowbox(self: &Rc<Self>) {
         let self_clone = self.clone();
         let flow_box = Self::build_pref_row_icons_flow_box();
         let pref_row_icons = &self_clone.pref_row_icons;
         pref_row_icons.set_child(Some(&flow_box));
 
         let icons_ordered_borrow = self_clone.icons_ordered.borrow();
+        let mut first_icon_item = None;
+        let mut current_icon_item = None;
 
-        for (url, icon) in icons_ordered_borrow.iter() {
+        for icon_item in icons_ordered_borrow.iter() {
+            let (key, icon) = icon_item;
+            if first_icon_item.is_none() {
+                first_icon_item = Some(icon_item);
+            }
+            if key == Self::CURRENT_ICON_KEY {
+                current_icon_item = Some(icon_item);
+            }
+
             let frame = gtk::Box::new(Orientation::Vertical, 0);
-            frame.set_widget_name(url);
+            frame.set_widget_name(key);
             let picture = Picture::new();
             picture.set_pixbuf(Some(&icon.pixbuf));
             picture.set_content_fit(ContentFit::ScaleDown);
@@ -276,11 +290,12 @@ impl IconPicker {
             flow_box.insert(&frame, -1);
         }
 
-        if let Some(first_child) = flow_box.first_child() {
-            let flow_box_child = first_child.downcast_ref::<FlowBoxChild>();
-            if let Some(flow_box_child) = flow_box_child {
-                flow_box.select_child(flow_box_child);
-            }
+        *self_clone.pref_row_icons_flow_box.borrow_mut() = Some(flow_box);
+
+        if let Some((key, _icon)) = current_icon_item {
+            self.select_icon(key);
+        } else if let Some((key, _icon)) = first_icon_item {
+            self.select_icon(key);
         }
 
         if icons_ordered_borrow.is_empty() {
@@ -288,8 +303,6 @@ impl IconPicker {
         } else {
             self.set_show_icons();
         }
-
-        *self_clone.pref_row_icons_flow_box.borrow_mut() = Some(flow_box);
     }
 
     async fn set_online_icons(self: &Rc<Self>, force: bool) -> Result<()> {
@@ -310,20 +323,59 @@ impl IconPicker {
         };
 
         let mut self_icons_borrow = self.icons.borrow_mut();
-        let mut self_icons_ordered_borrow = self.icons_ordered.borrow_mut();
 
         for (url, icon) in icons {
             self_icons_borrow.insert(url, icon);
         }
-
-        *self_icons_ordered_borrow = self_icons_borrow.clone().into_iter().collect();
-        self_icons_ordered_borrow.sort_by_key(|(_, a)| Reverse(a.pixbuf.byte_length()));
 
         if self_icons_borrow.is_empty() {
             bail!("No icons found for: {url}")
         }
 
         Ok(())
+    }
+
+    fn set_local_icon(self: &Rc<Self>) -> Result<()> {
+        let Some(current_icon_path) = self.desktop_file.borrow().get_icon_path() else {
+            bail!("No icon saved")
+        };
+        let pixbuf = match Pixbuf::from_file(&current_icon_path) {
+            Err(error) => {
+                bail!("Could not load current image into a Pixbuf: '{error:?}'");
+            }
+            Ok(pixbuf) => pixbuf,
+        };
+        let current_icon = Rc::new(Icon { pixbuf });
+        let mut icons_ordered_borrow = self.icons_ordered.borrow_mut();
+
+        let is_new_icon = self
+            .icons
+            .borrow_mut()
+            .insert(Self::CURRENT_ICON_KEY.into(), current_icon.clone())
+            .is_none();
+
+        if is_new_icon {
+            dbg!(Self::CURRENT_ICON_KEY);
+            icons_ordered_borrow.insert(0, (Self::CURRENT_ICON_KEY.into(), current_icon.clone()));
+        } else if let Some(index) = icons_ordered_borrow
+            .iter()
+            .position(|(key, _icon)| key == Self::CURRENT_ICON_KEY)
+        {
+            dbg!(index);
+            let _ = mem::replace(
+                &mut icons_ordered_borrow[index],
+                (Self::CURRENT_ICON_KEY.into(), current_icon.clone()),
+            );
+        }
+
+        Ok(())
+    }
+
+    fn set_icons_ordered(&self) {
+        let mut self_icons_ordered_borrow = self.icons_ordered.borrow_mut();
+
+        *self_icons_ordered_borrow = self.icons.borrow().clone().into_iter().collect();
+        self_icons_ordered_borrow.sort_by_key(|(_, a)| Reverse(a.pixbuf.byte_length()));
     }
 
     fn should_throttle(self: &Rc<Self>) -> bool {
@@ -386,12 +438,9 @@ impl IconPicker {
                     .icons
                     .borrow_mut()
                     .insert(filename.clone(), icon.clone());
-                self_clone
-                    .icons_ordered
-                    .borrow_mut()
-                    .push((filename.clone(), icon.clone()));
 
-                self_clone.reload_icons();
+                self_clone.set_icons_ordered();
+                self_clone.reload_icon_flowbox();
                 self_clone.select_icon(&filename);
             },
         );
