@@ -1,3 +1,15 @@
+## [0.3.1] - 2026-01-26
+
+### 🐛 Bug Fixes
+
+- *(release)* Corrected last released version
+- *(release)* Increment patch version for dry-run
+- Use Adwaita icon theme on KDE
+
+### 📚 Documentation
+
+- *(readme)* Update README.md (#14)
+- *(description)* Updated description text from #14
 ## [0.3.0] - 2026-01-22
 
 ### 🚀 Features
@@ -23,6 +35,7 @@
 
 - *(screenshots)* Reorder
 - Added copywrite
+- *(release)* V0.3.0
 ## [0.2.2] - 2026-01-10
 
 ### 🐛 Bug Fixes
@@ -57,19 +70,3 @@
 - *(desktop_file)* Better error message
 - *(release)* Remove 'v' before version in metainfo
 - *(release)* V0.2.0
-## [0.1.2] - 2026-01-05
-
-### 🐛 Bug Fixes
-
-- *(browsers)* Chromium browsers now match the correct desktop app when using a path in the url
-
-### 💼 Other
-
-- *(release)* Update submodules
-
-### ⚙️ Miscellaneous Tasks
-
-- *(firefox)* Typo in config
-- *(release)* Make sure screenshots order is preserved
-- *(release)* Added --dry-run option
-- *(release)* V0.1.2

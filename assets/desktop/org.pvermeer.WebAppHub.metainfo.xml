@@ -9,14 +9,14 @@
   <summary>Create Web Apps with ease</summary>
   <description>
     <p>
-    A Web App Manager, written in rust with GTK and beautiful Adwaita. With Web App Hub you can manage your Web App with ease. All apps will have their own icon and can be isolated from the normal browser profile.
+      A modern Web App Manager built with Rust, GTK, and the Adwaita design language. Web App Hub enables seamless management of web applications, each with its own icon and isolated browser profile.
     </p>
     <ul>
-      <li>Easy browser switching</li>
-      <li>Uses your installed browsers</li>
-      <li>Isolation build in if the browser supports it</li>
-      <li>Apps will have their own icon and dock indicator</li>
-      <li>Add custom browser configs with a yaml and a desktop file</li>
+      <li>Seamless browser switching between all installed browsers</li>
+      <li>Leverages your existing browser installations</li>
+      <li>Profile isolation for enhanced privacy and organization</li>
+      <li>Dedicated icons and dock indicators for each web application</li>
+      <li>Extensible configuration system via YAML and desktop files</li>
     </ul>
   </description>
   <content_rating type="oars-1.1" />
@@ -29,7 +29,7 @@
   <url type="contact">https://github.com/pvermeer/web-app-hub/issues</url>
   <!-- <url type="donation"></url> -->
   <url type="vcs-browser">https://github.com/pvermeer/web-app-hub</url>
-  <url type="help">https://github.com/pvermeer/web-app-hub/blob/v0.3.0/README.md</url>
+  <url type="help">https://github.com/pvermeer/web-app-hub/blob/v0.3.1/README.md</url>
   <url type="contribute">https://github.com/pvermeer/web-app-hub</url>
 
   <recommends>
@@ -45,28 +45,39 @@
   <screenshots>
 
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.0/assets/screenshots/1-Web-App.png</image>
+      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.1/assets/screenshots/1-Web-App.png</image>
       <caption>Web-App</caption>
     </screenshot>
 
     <screenshot>
-      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.0/assets/screenshots/2-Web-Apps.png</image>
+      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.1/assets/screenshots/2-Web-Apps.png</image>
       <caption>Web-Apps</caption>
     </screenshot>
 
     <screenshot>
-      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.0/assets/screenshots/3-Browsers.png</image>
+      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.1/assets/screenshots/3-Browsers.png</image>
       <caption>Browsers</caption>
     </screenshot>
 
     <screenshot>
-      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.0/assets/screenshots/4-Info.png</image>
+      <image>https://raw.githubusercontent.com/pvermeer/web-app-hub/refs/tags/v0.3.1/assets/screenshots/4-Info.png</image>
       <caption>Info</caption>
     </screenshot>
   </screenshots>
 
   <releases>
 
+    <release version="0.3.1" date="2026-01-26">
+      <description>
+        <p>Fixes:</p>
+        <ul>
+          <li>release: corrected last released version</li>
+          <li>release: increment patch version for dry-run</li>
+          <li>use Adwaita icon theme on KDE</li>
+        </ul>
+      </description>
+    </release>
+    
     <release version="0.3.0" date="2026-01-22">
       <description>
         <p>New features:</p>
@@ -107,15 +118,6 @@
         <p>New features:</p>
         <ul>
           <li>icon-picker: when using a path in url, base url is also checked for icons</li>
-        </ul>
-      </description>
-    </release>
-    
-    <release version="0.1.2" date="2026-01-05">
-      <description>
-        <p>Fixes:</p>
-        <ul>
-          <li>browsers: chromium browsers now match the correct desktop app when using a path in the url</li>
         </ul>
       </description>
     </release>
