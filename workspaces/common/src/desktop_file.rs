@@ -47,6 +47,7 @@ pub enum Keys {
     Icon,
     StartupWMClass,
     Categories,
+    Comment,
 }
 impl Display for Keys {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -66,6 +67,7 @@ impl Display for Keys {
             Self::Icon => write!(f, "Icon"),
             Self::StartupWMClass => write!(f, "StartupWMClass"),
             Self::Categories => write!(f, "Categories"),
+            Self::Comment => write!(f, "Comment"),
         }
     }
 }
@@ -471,6 +473,17 @@ impl DesktopFile {
     pub fn set_category(&mut self, categories: &Categories) {
         self.desktop_entry
             .add_desktop_entry(Keys::Categories.to_string(), categories.to_string());
+    }
+
+    pub fn get_description(&self) -> Option<String> {
+        self.desktop_entry
+            .desktop_entry(&Keys::Comment.to_string())
+            .and_then(map_to_string_option)
+    }
+
+    pub fn set_description(&mut self, description: &str) {
+        self.desktop_entry
+            .add_desktop_entry(Keys::Comment.to_string(), description.to_string());
     }
 
     pub fn copy_profile_config_to_profile_path(&self, profile_path: &Path) -> Result<()> {

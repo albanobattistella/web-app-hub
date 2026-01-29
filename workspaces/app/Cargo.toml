@@ -1,7 +1,7 @@
 [package]
 name = "web-app-hub"
 version = "0.3.1"
-description = "Create Web Apps with ease"
+description = "Create web apps with ease"
 edition = { workspace = true }
 license = "GPL-3.0-only"
 authors = ["PVermeer"]

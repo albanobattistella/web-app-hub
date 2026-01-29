@@ -123,6 +123,7 @@ fn create_app_desktop_file() -> Result<()> {
     let desktop_file = assets::get_desktop_file_in();
     let app_id = config::APP_ID.get_value();
     let app_name = config::APP_NAME.get_value();
+    let app_summary = config::APP_SUMMARY.get_value();
     let bin_name = config::BIN_NAME.get_value();
     let file_name = desktop_file_name();
     let save_path = assets_desktop_path().join(file_name);
@@ -134,6 +135,7 @@ fn create_app_desktop_file() -> Result<()> {
     base_desktop_file.add_desktop_entry("Icon".to_string(), app_id.clone());
     base_desktop_file.add_desktop_entry("StartupWMClass".to_string(), app_id.clone());
     base_desktop_file.add_desktop_entry("Exec".to_string(), bin_name.clone());
+    base_desktop_file.add_desktop_entry("Comment".to_string(), app_summary.clone());
 
     fs::write(&save_path, base_desktop_file.to_string()).inspect_err(|err| {
         error!(
