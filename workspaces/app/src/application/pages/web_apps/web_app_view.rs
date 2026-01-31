@@ -1,8 +1,9 @@
 mod icon_picker;
+mod optional_settings;
 
 use crate::application::{
     App,
-    pages::{NavPage, PrefPage},
+    pages::{NavPage, PrefPage, web_apps::web_app_view::optional_settings::OptionalSettings},
 };
 use common::{
     browsers::{Base, Browser},
@@ -24,8 +25,8 @@ use libadwaita::{
         prelude::{BoxExt, ButtonExt, EditableExt, WidgetExt},
     },
     prelude::{
-        ComboRowExt, EntryRowExt, NavigationPageExt, PreferencesGroupExt, PreferencesPageExt,
-        PreferencesRowExt,
+        ActionRowExt, ComboRowExt, EntryRowExt, NavigationPageExt, PreferencesGroupExt,
+        PreferencesPageExt, PreferencesRowExt,
     },
 };
 use std::{
@@ -58,6 +59,7 @@ pub struct WebAppView {
     isolate_row: SwitchRow,
     maximize_row: SwitchRow,
     browser_row: ComboRow,
+    optional_row: ActionRow,
     icon_picker: RefCell<Option<Rc<IconPicker>>>,
 }
 impl NavPage for WebAppView {
@@ -110,6 +112,7 @@ impl WebAppView {
         let isolate_row = Self::build_isolate_row(desktop_file, browser_can_isolate);
         let maximize_row = Self::build_maximize_row(desktop_file, browser_can_maximize);
         let browser_row = Self::build_browser_row(app, desktop_file);
+        let optional_row = Self::build_optional_row();
 
         Rc::new(Self {
             is_new: RefCell::new(is_new),
@@ -132,6 +135,7 @@ impl WebAppView {
             isolate_row,
             maximize_row,
             browser_row,
+            optional_row,
             icon_picker: RefCell::new(None),
         })
     }
@@ -144,11 +148,13 @@ impl WebAppView {
             .connect_clicked(move |_| self_clone.reset_desktop_file());
         let web_app_header = self.build_app_header();
         let general_pref_group = self.build_general_pref_group();
+        let bottom_pref_group = self.build_bottom_pref_group();
         let button_footer = self.build_button_footer();
 
         let mut pref_groups_borrow = self.pref_groups.borrow_mut();
         pref_groups_borrow.push(web_app_header);
         pref_groups_borrow.push(general_pref_group);
+        pref_groups_borrow.push(bottom_pref_group);
         pref_groups_borrow.push(button_footer);
 
         for pref_group in pref_groups_borrow.iter() {
@@ -255,9 +261,12 @@ impl WebAppView {
         app_image.set_margin_start(25);
         app_image.set_margin_end(25);
 
-        let browser_label = Label::new(None);
+        let browser_label = Label::builder()
+            .css_classes(["subtitle"])
+            .sensitive(false)
+            .build();
         if let Some(browser) = desktop_file_borrow.get_browser() {
-            browser_label.set_markup(&format!("<b>{}</b>", &browser.get_name_with_installation()));
+            browser_label.set_label(&browser.get_name_with_installation());
         }
 
         content_box.append(&app_image);
@@ -286,6 +295,16 @@ impl WebAppView {
         self.connect_isolate_row();
         self.connect_maximize_row();
         self.connect_browser_row();
+
+        pref_group
+    }
+
+    fn build_bottom_pref_group(self: &Rc<Self>) -> PreferencesGroup {
+        let pref_group = PreferencesGroup::builder().build();
+
+        pref_group.add(&self.optional_row);
+
+        self.connect_optional_row();
 
         pref_group
     }
@@ -427,6 +446,19 @@ impl WebAppView {
         }
 
         combo_row
+    }
+
+    fn build_optional_row() -> ActionRow {
+        let row = ActionRow::builder()
+            .title("Optional")
+            .subtitle("Optional settings for desktops with menus")
+            .activatable(true)
+            .build();
+
+        let suffix = Image::from_icon_name("go-next-symbolic");
+        row.add_suffix(&suffix);
+
+        row
     }
 
     fn build_button_footer(self: &Rc<Self>) -> PreferencesGroup {
@@ -796,6 +828,24 @@ impl WebAppView {
                 self_clone.on_isolation_change();
                 self_clone.on_desktop_file_change();
             });
+    }
+
+    fn connect_optional_row(self: &Rc<Self>) {
+        let app_clone = self.app.clone();
+        let desktop_file_clone = self.desktop_file.clone();
+
+        let self_clone = self.clone();
+
+        self.optional_row.connect_activated(move |_| {
+            let optional_dialog = OptionalSettings::new(&app_clone, &desktop_file_clone);
+
+            let self_clone = self_clone.clone();
+
+            optional_dialog.show_dialog(Some(move |result| match result {
+                Ok(()) => self_clone.on_desktop_file_change(),
+                Err(error) => self_clone.on_error("Failed to save optional settings", Some(&error)),
+            }));
+        });
     }
 
     fn reset_reset_button(self: &Rc<Self>) {

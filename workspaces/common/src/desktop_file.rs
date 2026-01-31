@@ -137,7 +137,8 @@ fn map_to_path_option(value: &str) -> Option<PathBuf> {
 }
 
 /// <https://specifications.freedesktop.org/menu/latest/category-registry.html>
-pub enum Categories {
+#[derive(Copy, Clone)]
+pub enum Category {
     AudioVideo,
     Audio,
     Video,
@@ -152,7 +153,7 @@ pub enum Categories {
     System,
     Utility,
 }
-impl Display for Categories {
+impl Display for Category {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::AudioVideo => write!(f, "AudioVideo"),
@@ -171,6 +172,65 @@ impl Display for Categories {
         }
     }
 }
+impl Category {
+    pub fn to_string_ui(&self) -> &str {
+        match self {
+            Self::AudioVideo => "Multimedia",
+            Self::Audio => "Audio",
+            Self::Video => "Video",
+            Self::Development => "Development",
+            Self::Education => "Education",
+            Self::Game => "Game",
+            Self::Graphics => "Graphics",
+            Self::Network => "Network / Internet",
+            Self::Office => "Office",
+            Self::Science => "Science",
+            Self::Settings => "Settings",
+            Self::System => "System",
+            Self::Utility => "Utility",
+        }
+    }
+
+    pub fn get_all() -> [Category; 13] {
+        let list: [Category; 13] = [
+            Self::AudioVideo,
+            Self::Audio,
+            Self::Video,
+            Self::Development,
+            Self::Education,
+            Self::Game,
+            Self::Graphics,
+            Self::Network,
+            Self::Office,
+            Self::Science,
+            Self::Settings,
+            Self::System,
+            Self::Utility,
+        ];
+
+        list
+    }
+
+    pub fn get_icon(&self) -> Image {
+        let icon_name = match self {
+            Self::AudioVideo => "applications-multimedia-symbolic",
+            Self::Audio => "audio-x-generic-symbolic",
+            Self::Video => "video-x-generic-symbolic",
+            Self::Development => "applications-engineering-symbolic",
+            Self::Education => "emoji-symbols-symbolic",
+            Self::Game => "applications-games-symbolic",
+            Self::Graphics => "applications-graphics-symbolic",
+            Self::Network => "web-browser-symbolic",
+            Self::Office => "x-office-document-symbolic",
+            Self::Science => "applications-science-symbolic",
+            Self::Settings => "preferences-other-symbolic",
+            Self::System => "preferences-system-symbolic",
+            Self::Utility => "applications-utilities-symbolic",
+        };
+
+        Image::from_icon_name(icon_name)
+    }
+}
 
 #[derive(Clone)]
 pub struct DesktopFile {
@@ -180,23 +240,15 @@ pub struct DesktopFile {
 }
 impl DesktopFile {
     pub fn new(browser_configs: &Rc<BrowserConfigs>, app_dirs: &Rc<AppDirs>) -> Self {
-        let mut desktop_entry = DesktopEntry::from_appid(String::new());
-
-        let random_id: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(8)
-            .map(char::from)
-            .collect();
-        desktop_entry.add_desktop_entry(Keys::Id.to_string(), random_id);
-
-        let version = config::VERSION.get_value().clone();
-        desktop_entry.add_desktop_entry(Keys::Version.to_string(), version);
-
-        Self {
+        let desktop_entry = DesktopEntry::from_appid(String::new());
+        let mut this = Self {
             desktop_entry,
             browser_configs: browser_configs.clone(),
             app_dirs: app_dirs.clone(),
-        }
+        };
+        this.set_defaults();
+
+        this
     }
 
     pub fn from_path(
@@ -205,12 +257,11 @@ impl DesktopFile {
         app_dirs: &Rc<AppDirs>,
     ) -> Result<Self> {
         let desktop_entry = DesktopEntry::from_path(path, None::<&[String]>)?;
+        let mut this = Self::new(browser_configs, app_dirs);
+        this.desktop_entry = desktop_entry;
+        this.set_defaults();
 
-        Ok(Self {
-            desktop_entry,
-            browser_configs: browser_configs.clone(),
-            app_dirs: app_dirs.clone(),
-        })
+        Ok(this)
     }
 
     pub fn from_string(
@@ -220,12 +271,29 @@ impl DesktopFile {
         app_dirs: &Rc<AppDirs>,
     ) -> Result<Self> {
         let desktop_entry = DesktopEntry::from_str(path, str, None::<&[String]>)?;
+        let mut this = Self::new(browser_configs, app_dirs);
+        this.desktop_entry = desktop_entry;
+        this.set_defaults();
 
-        Ok(Self {
-            desktop_entry,
-            browser_configs: browser_configs.clone(),
-            app_dirs: app_dirs.clone(),
-        })
+        Ok(this)
+    }
+
+    fn set_defaults(&mut self) {
+        let version = Version::parse(config::VERSION.get_value()).unwrap_or(Version::new(0, 0, 0));
+        self.set_version(&version);
+
+        if self.get_id().is_none() {
+            let random_id: String = rand::thread_rng()
+                .sample_iter(&Alphanumeric)
+                .take(8)
+                .map(char::from)
+                .collect();
+            self.set_id(&random_id);
+        }
+
+        if self.get_category().is_none() {
+            self.set_category(&Category::Network);
+        }
     }
 
     pub fn get_path(&self) -> PathBuf {
@@ -470,9 +538,32 @@ impl DesktopFile {
             .and_then(map_to_string_option)
     }
 
-    pub fn set_category(&mut self, categories: &Categories) {
+    pub fn set_category(&mut self, category: &Category) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Categories.to_string(), categories.to_string());
+            .add_desktop_entry(Keys::Categories.to_string(), category.to_string());
+
+        debug!(
+            "Set '{}' on desktop file: {}",
+            &Keys::Categories.to_string(),
+            &self
+                .desktop_entry
+                .desktop_entry(&Keys::Categories.to_string())
+                .unwrap_or_default()
+        );
+    }
+
+    fn set_category_str(&mut self, category: &str) {
+        self.desktop_entry
+            .add_desktop_entry(Keys::Categories.to_string(), category.to_string());
+
+        debug!(
+            "Set '{}' on desktop file: {}",
+            &Keys::Categories.to_string(),
+            &self
+                .desktop_entry
+                .desktop_entry(&Keys::Categories.to_string())
+                .unwrap_or_default()
+        );
     }
 
     pub fn get_description(&self) -> Option<String> {
@@ -484,6 +575,15 @@ impl DesktopFile {
     pub fn set_description(&mut self, description: &str) {
         self.desktop_entry
             .add_desktop_entry(Keys::Comment.to_string(), description.to_string());
+
+        debug!(
+            "Set '{}' on desktop file: {}",
+            &Keys::Comment.to_string(),
+            &self
+                .desktop_entry
+                .desktop_entry(&Keys::Comment.to_string())
+                .unwrap_or_default()
+        );
     }
 
     pub fn copy_profile_config_to_profile_path(&self, profile_path: &Path) -> Result<()> {
@@ -901,8 +1001,12 @@ impl DesktopFile {
         new_desktop_file.set_isolated(entries.isolate);
         new_desktop_file.set_maximized(entries.maximize);
         new_desktop_file.set_profile_path(&entries.profile_path);
-        if new_desktop_file.get_category().is_none() {
-            new_desktop_file.set_category(&Categories::Network);
+
+        if let Some(description) = self.get_description() {
+            new_desktop_file.set_description(&description);
+        }
+        if let Some(category) = self.get_category() {
+            new_desktop_file.set_category_str(&category);
         }
 
         Ok(new_desktop_file)
