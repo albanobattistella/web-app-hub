@@ -33,7 +33,7 @@ pub struct DesktopFileEntries {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Keys {
+pub enum Key {
     Gwa,
     Version,
     Url,
@@ -49,7 +49,7 @@ pub enum Keys {
     Categories,
     Comment,
 }
-impl Display for Keys {
+impl Display for Key {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let identifier = config::APP_NAME_SHORT.get_value().to_uppercase();
 
@@ -102,7 +102,7 @@ impl Display for DesktopFileError {
 impl std::error::Error for DesktopFileError {}
 #[derive(Debug, Clone)]
 pub struct ValidationError {
-    pub field: Keys,
+    pub field: Key,
     pub message: String,
 }
 impl Display for ValidationError {
@@ -308,48 +308,48 @@ impl DesktopFile {
 
     pub fn get_is_owned_app(&self) -> bool {
         self.desktop_entry
-            .desktop_entry(&Keys::Gwa.to_string())
+            .desktop_entry(&Key::Gwa.to_string())
             .and_then(map_to_bool_option)
             .is_some_and(|is_owned| is_owned)
     }
 
     pub fn set_is_owned_app(&mut self) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Gwa.to_string(), true.to_string());
+            .add_desktop_entry(Key::Gwa.to_string(), true.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Gwa.to_string(),
+            &Key::Gwa.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Gwa.to_string())
+                .desktop_entry(&Key::Gwa.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_name(&self) -> Option<String> {
         self.desktop_entry
-            .desktop_entry(&Keys::Name.to_string())
+            .desktop_entry(&Key::Name.to_string())
             .and_then(map_to_string_option)
     }
 
     pub fn set_name(&mut self, id: &str) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Name.to_string(), id.to_string());
+            .add_desktop_entry(Key::Name.to_string(), id.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Name.to_string(),
+            &Key::Name.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Name.to_string())
+                .desktop_entry(&Key::Name.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_version(&self) -> Option<Version> {
         self.desktop_entry
-            .desktop_entry(&Keys::Version.to_string())
+            .desktop_entry(&Key::Version.to_string())
             .map(|result| {
                 Version::parse(result).expect("Failed to parse 'Version' on 'DesktopFile'")
             })
@@ -357,113 +357,113 @@ impl DesktopFile {
 
     pub fn set_version(&mut self, version: &Version) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Version.to_string(), version.to_string());
+            .add_desktop_entry(Key::Version.to_string(), version.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Version.to_string(),
+            &Key::Version.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Version.to_string())
+                .desktop_entry(&Key::Version.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_exec(&self) -> Option<String> {
         self.desktop_entry
-            .desktop_entry(&Keys::Exec.to_string())
+            .desktop_entry(&Key::Exec.to_string())
             .and_then(map_to_string_option)
     }
 
     pub fn get_id(&self) -> Option<String> {
         self.desktop_entry
-            .desktop_entry(&Keys::Id.to_string())
+            .desktop_entry(&Key::Id.to_string())
             .and_then(map_to_string_option)
     }
 
     pub fn set_id(&mut self, id: &str) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Id.to_string(), id.to_string());
+            .add_desktop_entry(Key::Id.to_string(), id.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Id.to_string(),
+            &Key::Id.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Id.to_string())
+                .desktop_entry(&Key::Id.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_url(&self) -> Option<String> {
         self.desktop_entry
-            .desktop_entry(&Keys::Url.to_string())
+            .desktop_entry(&Key::Url.to_string())
             .and_then(map_to_string_option)
     }
 
     pub fn set_url(&mut self, url: &str) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Url.to_string(), url.to_string());
+            .add_desktop_entry(Key::Url.to_string(), url.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Url.to_string(),
+            &Key::Url.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Url.to_string())
+                .desktop_entry(&Key::Url.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_browser(&self) -> Option<Rc<Browser>> {
         self.desktop_entry
-            .desktop_entry(&Keys::BrowserId.to_string())
+            .desktop_entry(&Key::BrowserId.to_string())
             .and_then(map_to_string_option)
             .and_then(|browser_id| self.browser_configs.get_by_id(&browser_id))
     }
 
     pub fn set_browser(&mut self, browser: &Rc<Browser>) {
         self.desktop_entry
-            .add_desktop_entry(Keys::BrowserId.to_string(), browser.id.clone());
+            .add_desktop_entry(Key::BrowserId.to_string(), browser.id.clone());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::BrowserId.to_string(),
+            &Key::BrowserId.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::BrowserId.to_string())
+                .desktop_entry(&Key::BrowserId.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_isolated(&self) -> Option<bool> {
         self.desktop_entry
-            .desktop_entry(&Keys::Isolate.to_string())
+            .desktop_entry(&Key::Isolate.to_string())
             .and_then(map_to_bool_option)
     }
 
     pub fn set_isolated(&mut self, is_isolated: bool) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Isolate.to_string(), is_isolated.to_string());
+            .add_desktop_entry(Key::Isolate.to_string(), is_isolated.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Isolate.to_string(),
+            &Key::Isolate.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Isolate.to_string())
+                .desktop_entry(&Key::Isolate.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_maximized(&self) -> Option<bool> {
         self.desktop_entry
-            .desktop_entry(&Keys::Maximize.to_string())
+            .desktop_entry(&Key::Maximize.to_string())
             .and_then(map_to_bool_option)
     }
 
     pub fn set_maximized(&mut self, is_maximized: bool) {
-        let key = Keys::Maximize.to_string();
+        let key = Key::Maximize.to_string();
 
         self.desktop_entry
             .add_desktop_entry(key.clone(), is_maximized.to_string());
@@ -492,96 +492,96 @@ impl DesktopFile {
 
     pub fn get_icon_path(&self) -> Option<PathBuf> {
         self.desktop_entry
-            .desktop_entry(&Keys::Icon.to_string())
+            .desktop_entry(&Key::Icon.to_string())
             .and_then(map_to_path_option)
     }
 
     pub fn set_icon_path(&mut self, path: &Path) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Icon.to_string(), path.to_string_lossy().to_string());
+            .add_desktop_entry(Key::Icon.to_string(), path.to_string_lossy().to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Icon.to_string(),
+            &Key::Icon.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Icon.to_string())
+                .desktop_entry(&Key::Icon.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_profile_path(&self) -> Option<PathBuf> {
         self.desktop_entry
-            .desktop_entry(&Keys::Profile.to_string())
+            .desktop_entry(&Key::Profile.to_string())
             .and_then(map_to_path_option)
     }
 
     pub fn set_profile_path(&mut self, path: &Path) {
         self.desktop_entry.add_desktop_entry(
-            Keys::Profile.to_string(),
+            Key::Profile.to_string(),
             path.to_string_lossy().to_string(),
         );
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Profile.to_string(),
+            &Key::Profile.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Profile.to_string())
+                .desktop_entry(&Key::Profile.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_category(&self) -> Option<String> {
         self.desktop_entry
-            .desktop_entry(&Keys::Categories.to_string())
+            .desktop_entry(&Key::Categories.to_string())
             .and_then(map_to_string_option)
     }
 
     pub fn set_category(&mut self, category: &Category) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Categories.to_string(), category.to_string());
+            .add_desktop_entry(Key::Categories.to_string(), category.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Categories.to_string(),
+            &Key::Categories.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Categories.to_string())
+                .desktop_entry(&Key::Categories.to_string())
                 .unwrap_or_default()
         );
     }
 
     fn set_category_str(&mut self, category: &str) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Categories.to_string(), category.to_string());
+            .add_desktop_entry(Key::Categories.to_string(), category.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Categories.to_string(),
+            &Key::Categories.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Categories.to_string())
+                .desktop_entry(&Key::Categories.to_string())
                 .unwrap_or_default()
         );
     }
 
     pub fn get_description(&self) -> Option<String> {
         self.desktop_entry
-            .desktop_entry(&Keys::Comment.to_string())
+            .desktop_entry(&Key::Comment.to_string())
             .and_then(map_to_string_option)
     }
 
     pub fn set_description(&mut self, description: &str) {
         self.desktop_entry
-            .add_desktop_entry(Keys::Comment.to_string(), description.to_string());
+            .add_desktop_entry(Key::Comment.to_string(), description.to_string());
 
         debug!(
             "Set '{}' on desktop file: {}",
-            &Keys::Comment.to_string(),
+            &Key::Comment.to_string(),
             &self
                 .desktop_entry
-                .desktop_entry(&Keys::Comment.to_string())
+                .desktop_entry(&Key::Comment.to_string())
                 .unwrap_or_default()
         );
     }
@@ -831,27 +831,27 @@ impl DesktopFile {
 
     fn get_entries(&self) -> Result<DesktopFileEntries, DesktopFileError> {
         let name = self.get_name().ok_or(ValidationError {
-            field: Keys::Name,
+            field: Key::Name,
             message: "Missing".to_string(),
         })?;
         let app_id = self.get_id().ok_or(ValidationError {
-            field: Keys::Id,
+            field: Key::Id,
             message: "Missing".to_string(),
         })?;
         let version = self.get_version().ok_or(ValidationError {
-            field: Keys::Version,
+            field: Key::Version,
             message: "Missing".to_string(),
         })?;
 
         let url_object = self
             .get_url()
             .ok_or(ValidationError {
-                field: Keys::Url,
+                field: Key::Url,
                 message: "Missing".to_string(),
             })
             .and_then(|url| {
                 Url::parse(&url).map_err(|_| ValidationError {
-                    field: Keys::Url,
+                    field: Key::Url,
                     message: "Invalid".to_string(),
                 })
             })?;
@@ -860,26 +860,26 @@ impl DesktopFile {
             .domain()
             .or_else(|| url_object.host_str())
             .ok_or(ValidationError {
-                field: Keys::Url,
+                field: Key::Url,
                 message: "Invalid domain".to_string(),
             })?
             .to_string();
         let url_path = url_object.path().to_string();
 
         let browser = self.get_browser().ok_or(ValidationError {
-            field: Keys::BrowserId,
+            field: Key::BrowserId,
             message: "Missing".to_string(),
         })?;
         let isolate = self.get_isolated().ok_or(ValidationError {
-            field: Keys::Isolate,
+            field: Key::Isolate,
             message: "Missing".to_string(),
         })?;
         let maximize = self.get_maximized().ok_or(ValidationError {
-            field: Keys::Maximize,
+            field: Key::Maximize,
             message: "Missing".to_string(),
         })?;
         let icon = self.get_icon_path().ok_or(ValidationError {
-            field: Keys::Icon,
+            field: Key::Icon,
             message: "Missing".to_string(),
         })?;
         let profile_path = self
@@ -892,7 +892,7 @@ impl DesktopFile {
                 }
             })
             .ok_or(ValidationError {
-                field: Keys::Profile,
+                field: Key::Profile,
                 message: "Missing".to_string(),
             })?;
 
