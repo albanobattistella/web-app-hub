@@ -88,8 +88,11 @@ impl DesktopFile {
     }
 
     fn set_defaults(&mut self) {
-        let version = Version::parse(config::VERSION.get_value()).unwrap_or(Version::new(0, 0, 0));
-        self.set_version(&version);
+        if self.get_version().is_none() {
+            let version =
+                Version::parse(config::VERSION.get_value()).unwrap_or(Version::new(0, 0, 0));
+            self.set_version(&version);
+        }
 
         if self.get_id().is_none() {
             let random_id: String = rand::thread_rng()
