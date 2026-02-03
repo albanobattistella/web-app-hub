@@ -11,6 +11,8 @@ pub struct CacheWindowSettings {
     pub height: i32,
     #[serde(default)]
     pub width: i32,
+    #[serde(default)]
+    pub maximized: bool,
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
@@ -43,9 +45,10 @@ impl CacheSettings {
         }
     }
 
-    pub fn set_window_size(&mut self, width: i32, height: i32) {
+    pub fn set_window_size(&mut self, width: i32, height: i32, maximized: bool) {
         self.settings.window.width = width;
         self.settings.window.height = height;
+        self.settings.window.maximized = maximized;
     }
 
     pub fn reset(&mut self) {

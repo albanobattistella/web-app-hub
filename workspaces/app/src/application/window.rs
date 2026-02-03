@@ -154,14 +154,21 @@ impl AppWindow {
             window_settings.height
         };
 
+        let is_maximized = window_settings.maximized;
+
         self.adw_window.set_default_width(width);
         self.adw_window.set_default_height(height);
+        self.adw_window.set_maximized(is_maximized);
 
         let app_clone = app.clone();
 
         self.adw_window.connect_close_request(move |window| {
             let mut cache_settings_borrow = app_clone.cache_settings.borrow_mut();
-            cache_settings_borrow.set_window_size(window.width(), window.height());
+            cache_settings_borrow.set_window_size(
+                window.width(),
+                window.height(),
+                window.is_maximized(),
+            );
 
             let _ = cache_settings_borrow.save();
 
