@@ -152,6 +152,12 @@ impl OptionalSettings {
             && let Ok(index) = index.try_into()
         {
             combo_row.set_selected(index);
+        } else if let Some(index) = all_categories
+            .iter()
+            .position(|category| Category::Network == *category)
+            && let Ok(index) = index.try_into()
+        {
+            combo_row.set_selected(index);
         }
 
         combo_row

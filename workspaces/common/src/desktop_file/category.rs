@@ -3,7 +3,7 @@ use std::fmt::Display;
 use gtk::Image;
 
 /// <https://specifications.freedesktop.org/menu/latest/category-registry.html>
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Category {
     AudioVideo,
     Audio,
