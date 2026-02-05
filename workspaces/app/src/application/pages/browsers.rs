@@ -111,6 +111,7 @@ impl BrowsersPage {
         row
     }
 
+    #[allow(clippy::too_many_lines)]
     fn build_browser_expand_content(app: &Rc<App>, browser: &Browser) -> gtk::Box {
         let content_box = gtk::Box::new(Orientation::Vertical, 12);
         content_box.set_margin_top(12);
