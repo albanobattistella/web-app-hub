@@ -5,4 +5,5 @@ can_isolate: true
 desktop_file_name_prefix: one.ablaze.floorp.floorp
 base: firefox
 issues:
-  - Unable to remove ui when not isolated
+  en:
+    - Unable to remove ui when not isolated

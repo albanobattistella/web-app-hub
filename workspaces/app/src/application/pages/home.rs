@@ -7,11 +7,11 @@ use common::{
     utils::OnceLockExt,
 };
 use gtk::{
-    Align, Button, Orientation,
+    Align, Button, Justification, Orientation,
     prelude::{ButtonExt, WidgetExt},
 };
 use libadwaita::{
-    ActionRow, NavigationPage, WrapBox,
+    ActionRow, JustifyMode, NavigationPage, WrapBox,
     gtk::{self, Label, prelude::BoxExt},
 };
 use std::rc::Rc;
@@ -32,7 +32,7 @@ impl NavPage for HomePage {
 }
 impl HomePage {
     pub fn new() -> Rc<Self> {
-        let title = "Home";
+        let title = t!("home.title");
         let icon = "go-home-symbolic";
 
         let ContentPage {
@@ -40,7 +40,7 @@ impl HomePage {
             nav_row,
             content_box,
             ..
-        } = Self::build_nav_page(title, icon).with_content_box();
+        } = Self::build_nav_page(&title, icon).with_content_box();
 
         Rc::new(Self {
             nav_page,
@@ -95,26 +95,13 @@ impl HomePage {
             .build();
 
         let text = Label::builder()
-            .label("To get started you may create your first web app.")
+            .label(t!("home.get_started"))
+            .css_classes(["label-spaced"])
             .wrap(true)
-            .justify(gtk::Justification::Center)
-            .build();
-
-        let text2 = Label::builder()
-            .label("The browser tab show the supported and installed browsers")
-            .wrap(true)
-            .justify(gtk::Justification::Center)
-            .build();
-
-        let text3 = Label::builder()
-            .label("The info tab shows some tips and tricks + some general information")
-            .wrap(true)
-            .justify(gtk::Justification::Center)
+            .justify(Justification::Center)
             .build();
 
         content_box.append(&text);
-        content_box.append(&text2);
-        content_box.append(&text3);
 
         content_box
     }
@@ -122,7 +109,7 @@ impl HomePage {
     fn build_action_buttons(app: &Rc<App>) -> WrapBox {
         let content_box = WrapBox::builder()
             .orientation(Orientation::Horizontal)
-            .justify(libadwaita::JustifyMode::Spread)
+            .justify(JustifyMode::Spread)
             .justify_last_line(true)
             .child_spacing(12)
             .line_spacing(12)
@@ -133,14 +120,14 @@ impl HomePage {
             .build();
 
         let go_to_apps_button = Button::builder()
-            .label("Go to Web Apps")
+            .label(t!("home.button.go_to_web_apps"))
             .css_classes(["suggested-action", "pill"])
             .valign(Align::Center)
             .halign(Align::Center)
             .build();
 
         let more_info_button = Button::builder()
-            .label("More information")
+            .label(t!("home.button.more_information"))
             .css_classes(["pill"])
             .valign(Align::Center)
             .halign(Align::Center)

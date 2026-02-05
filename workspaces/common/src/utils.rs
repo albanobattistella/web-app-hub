@@ -94,6 +94,15 @@ pub mod env {
     pub fn is_flatpak_container() -> bool {
         env::var("container").is_ok_and(|value| value == "flatpak")
     }
+
+    pub fn get_language() -> Option<String> {
+        env::var("LANG").ok().and_then(|language| {
+            language
+                .split('.')
+                .next()
+                .map(std::string::ToString::to_string)
+        })
+    }
 }
 
 pub mod strings {
@@ -211,6 +220,6 @@ pub trait OnceLockExt<T> {
 }
 impl<T> OnceLockExt<T> for OnceLock<T> {
     fn get_value(&self) -> &T {
-        self.get().expect("OnceCell not initialized")
+        self.get().expect("OnceLock not initialized")
     }
 }

@@ -6,4 +6,5 @@ can_start_maximized: true
 desktop_file_name_prefix: com.vivaldi.Vivaldi.vivaldi
 base: chromium
 issues:
-  - Does not remember window size and position
+  en:
+    - Does not remember window size and position

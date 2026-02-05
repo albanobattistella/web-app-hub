@@ -28,7 +28,7 @@ impl NavPage for BrowsersPage {
 }
 impl BrowsersPage {
     pub fn new() -> Rc<Self> {
-        let title = "Browsers";
+        let title = t!("browsers.title");
         let icon = "web-browser-symbolic";
 
         let PrefPage {
@@ -36,7 +36,7 @@ impl BrowsersPage {
             nav_row,
             prefs_page,
             ..
-        } = Self::build_nav_page(title, icon).with_preference_page();
+        } = Self::build_nav_page(&title, icon).with_preference_page();
 
         Rc::new(Self {
             nav_page,
@@ -60,8 +60,8 @@ impl BrowsersPage {
 
         if flatpak_browsers.is_empty() && system_browsers.is_empty() {
             let status_page = StatusPage::builder()
-                .title("No compatible browsers found")
-                .description("Try installing one!")
+                .title(t!("browsers.no_browsers.title"))
+                .description(t!("browsers.no_browsers.description"))
                 .icon_name("system-search-symbolic")
                 .build();
 
@@ -74,19 +74,19 @@ impl BrowsersPage {
         let flatpak_pref_group = PreferencesGroup::builder().title("Flatpak").build();
         let system_pref_group = PreferencesGroup::builder().title("System").build();
         let uninstalled_pref_group = PreferencesGroup::builder()
-            .title("Supported but not installed")
+            .title(t!("browsers.not_installed.title"))
             .build();
 
         for browser in &flatpak_browsers {
-            let browser_row = Self::build_browser_row(browser);
+            let browser_row = Self::build_browser_row(app, browser);
             flatpak_pref_group.add(&browser_row);
         }
         for browser in &system_browsers {
-            let browser_row = Self::build_browser_row(browser);
+            let browser_row = Self::build_browser_row(app, browser);
             system_pref_group.add(&browser_row);
         }
         for browser in &uninstalled_browsers {
-            let browser_row = Self::build_browser_row(browser);
+            let browser_row = Self::build_browser_row(app, browser);
             uninstalled_pref_group.add(&browser_row);
         }
 
@@ -101,17 +101,17 @@ impl BrowsersPage {
         ])
     }
 
-    fn build_browser_row(browser: &Browser) -> ExpanderRow {
+    fn build_browser_row(app: &Rc<App>, browser: &Browser) -> ExpanderRow {
         let row = ExpanderRow::builder().title(&browser.name).build();
         row.add_prefix(&browser.get_icon());
 
-        let browser_expand = Self::build_browser_expand_content(browser);
+        let browser_expand = Self::build_browser_expand_content(app, browser);
         row.add_row(&browser_expand);
 
         row
     }
 
-    fn build_browser_expand_content(browser: &Browser) -> gtk::Box {
+    fn build_browser_expand_content(app: &Rc<App>, browser: &Browser) -> gtk::Box {
         let content_box = gtk::Box::new(Orientation::Vertical, 12);
         content_box.set_margin_top(12);
         content_box.set_margin_bottom(12);
@@ -162,25 +162,41 @@ impl BrowsersPage {
 
         let mut capabilities_list = String::new();
         if browser.can_isolate {
-            let _ = writeln!(capabilities_list, "• Can isolate your web apps");
+            let _ = writeln!(
+                capabilities_list,
+                "• {}",
+                t!("browsers.capabilities.isolate")
+            );
         }
         if browser.can_start_maximized {
-            let _ = writeln!(capabilities_list, "• Can start your web apps maximized");
+            let _ = writeln!(
+                capabilities_list,
+                "• {}",
+                t!("browsers.capabilities.maximize")
+            );
         }
         match browser.base {
             Base::None => {}
             Base::Chromium => {
-                let _ = writeln!(capabilities_list, "• Setup browser with <Ctrl+T>");
+                let _ = writeln!(
+                    capabilities_list,
+                    "• {}",
+                    t!("browsers.capabilities.setup", key_bind = "<Ctrl+T>")
+                );
             }
             Base::Firefox => {
-                let _ = writeln!(capabilities_list, "• Setup browser with <Alt>");
+                let _ = writeln!(
+                    capabilities_list,
+                    "• {} <Alt>",
+                    t!("browsers.capabilities.setup", key_bind = "<Alt>")
+                );
             }
         }
 
         if !capabilities_list.is_empty() {
             let capability_label = Label::builder()
                 .use_markup(true)
-                .label("<b>Capabilities:</b>")
+                .label(format!("<b>{}</b>", t!("browsers.capabilities.title")))
                 .build();
             let capability_list_label = Label::builder()
                 .label(&capabilities_list)
@@ -192,15 +208,22 @@ impl BrowsersPage {
             content_box.append(&capability_list_label);
         }
 
-        if !browser.issues.is_empty() {
+        let issues_from_locale = browser
+            .issues
+            .get(&app.locale.current)
+            .or(browser.issues.get(&app.locale.default));
+
+        if let Some(issues) = issues_from_locale
+            && !issues.is_empty()
+        {
             let mut markup_issues = String::new();
-            for issue in &browser.issues {
+            for issue in issues {
                 let _ = writeln!(markup_issues, "• {issue}");
             }
 
             let issues_label = Label::builder()
                 .use_markup(true)
-                .label("<b>Known issues:</b>")
+                .label(format!("<b>{}</b>", t!("browsers.issues.title")))
                 .build();
 
             let issues_list_label = Label::builder()

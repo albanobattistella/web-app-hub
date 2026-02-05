@@ -68,7 +68,7 @@ impl OptionalSettings {
         self.init(web_app_view);
 
         let dialog = PreferencesDialog::builder()
-            .title("Optional Settings")
+            .title(t!("web_apps.web_app_view.optional.dialog.title"))
             .height_request(300)
             .build();
         dialog.add(&self.pref_page);
@@ -79,8 +79,10 @@ impl OptionalSettings {
 
     fn build_optional_pref_group() -> PreferencesGroup {
         PreferencesGroup::builder()
-            .title("Optional")
-            .description("Settings for desktops that use a categorized app menu")
+            .title(t!("web_apps.web_app_view.optional.dialog.menu_group.title"))
+            .description(t!(
+                "web_apps.web_app_view.optional.dialog.menu_group.subtitle"
+            ))
             .build()
     }
 
@@ -88,7 +90,9 @@ impl OptionalSettings {
         let description = desktop_file.borrow().get_description().unwrap_or_default();
 
         EntryRow::builder()
-            .title("Short app description")
+            .title(t!(
+                "web_apps.web_app_view.optional.dialog.menu_group.description.title"
+            ))
             .text(description)
             .show_apply_button(true)
             .input_purpose(InputPurpose::FreeForm)
@@ -131,8 +135,12 @@ impl OptionalSettings {
         });
 
         let combo_row = ComboRow::builder()
-            .title("Category")
-            .subtitle("Pick a category")
+            .title(t!(
+                "web_apps.web_app_view.optional.dialog.menu_group.category.title"
+            ))
+            .subtitle(t!(
+                "web_apps.web_app_view.optional.dialog.menu_group.category.subtitle"
+            ))
             .model(&list)
             .factory(&factory)
             .build();

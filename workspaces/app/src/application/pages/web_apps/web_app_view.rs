@@ -74,7 +74,6 @@ impl NavPage for WebAppView {
 }
 impl WebAppView {
     const TOAST_MESSAGE_TIMEOUT: u32 = 4;
-    const TOAST_RESET: &str = "Reset";
 
     pub fn new(
         app: &Rc<App>,
@@ -86,7 +85,7 @@ impl WebAppView {
         let desktop_file_original = desktop_file_borrow.clone(); // Deep clone
         let title = desktop_file_borrow
             .get_name()
-            .unwrap_or("New Web App".to_string());
+            .unwrap_or(t!("web_apps.web_app_view.new_app.title").to_string());
         let browser_can_isolate = desktop_file_borrow
             .get_browser()
             .is_some_and(|browser| browser.can_isolate);
@@ -216,7 +215,7 @@ impl WebAppView {
     }
 
     fn build_header_reset_button() -> Button {
-        let reset_button = Button::with_label("Reset");
+        let reset_button = Button::with_label(&t!("web_apps.web_app_view.button.reset"));
         reset_button.set_sensitive(false);
 
         reset_button
@@ -229,7 +228,7 @@ impl WebAppView {
         let content_box = gtk::Box::new(Orientation::Vertical, 6);
         let app_name = desktop_file_borrow
             .get_name()
-            .unwrap_or("No name...".to_string());
+            .unwrap_or(t!("web_apps.web_app_view.new_app.header.name").to_string());
         let app_label = Label::builder()
             .label(app_name)
             .css_classes(["title-1"])
@@ -314,7 +313,7 @@ impl WebAppView {
         let name = desktop_file.borrow().get_name().unwrap_or_default();
 
         EntryRow::builder()
-            .title("Web app name")
+            .title(t!("web_apps.web_app_view.name.title"))
             .text(name)
             .show_apply_button(true)
             .input_purpose(InputPurpose::Name)
@@ -325,7 +324,7 @@ impl WebAppView {
         let url = desktop_file.borrow().get_url().unwrap_or_default();
 
         EntryRow::builder()
-            .title("Website URL")
+            .title(t!("web_apps.web_app_view.url.title"))
             .text(url)
             .show_apply_button(true)
             .input_purpose(InputPurpose::Url)
@@ -341,11 +340,11 @@ impl WebAppView {
         let is_isolated = has_isolated.unwrap_or(false);
 
         let switch_row = SwitchRow::builder()
-            .title("Isolate")
-            .subtitle("Use an isolated profile")
+            .title(t!("web_apps.web_app_view.isolate.title"))
+            .subtitle(t!("web_apps.web_app_view.isolate.subtitle"))
             .active(is_isolated)
             .sensitive(browser_can_isolate)
-            .tooltip_text("The selected browser is not capable of isolation")
+            .tooltip_text(t!("web_apps.web_app_view.isolate.disabled"))
             .has_tooltip(!browser_can_isolate)
             .build();
 
@@ -371,11 +370,11 @@ impl WebAppView {
         let is_maximized = has_maximized.unwrap_or(false);
 
         let switch_row = SwitchRow::builder()
-            .title("Maximize")
-            .subtitle("Always start the app maximized")
+            .title(t!("web_apps.web_app_view.maximize.title"))
+            .subtitle(t!("web_apps.web_app_view.maximize.subtitle"))
             .active(is_maximized)
             .sensitive(browser_can_maximize)
-            .tooltip_text("The selected browser is not capable of starting maximized")
+            .tooltip_text(t!("web_apps.web_app_view.maximize.disabled"))
             .has_tooltip(!browser_can_maximize)
             .build();
 
@@ -423,10 +422,11 @@ impl WebAppView {
 
             let browser = browser_item_boxed.borrow::<Rc<Browser>>();
             let box_container = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+            let label = Label::new(Some(&browser.get_name_with_installation()));
             let icon = browser.get_icon();
 
             box_container.append(&icon);
-            box_container.append(&Label::new(Some(&browser.get_name_with_installation())));
+            box_container.append(&label);
 
             if !browser.is_installed() {
                 icon.add_css_class("error");
@@ -435,12 +435,16 @@ impl WebAppView {
                 list_item.set_selectable(false);
             }
 
+            if browser.is_no_browser() {
+                label.set_label(&t!("web_apps.web_app_view.browser.no_browser"));
+            }
+
             list_item.set_child(Some(&box_container));
         });
 
         let combo_row = ComboRow::builder()
-            .title("Browser")
-            .subtitle("Pick a browser")
+            .title(t!("web_apps.web_app_view.browser.title"))
+            .subtitle(t!("web_apps.web_app_view.browser.subtitle"))
             .model(&list)
             .factory(&factory)
             .build();
@@ -468,8 +472,8 @@ impl WebAppView {
 
     fn build_optional_row() -> ActionRow {
         let row = ActionRow::builder()
-            .title("Optional")
-            .subtitle("Optional settings for desktops with menus")
+            .title(t!("web_apps.web_app_view.optional.title"))
+            .subtitle(t!("web_apps.web_app_view.optional.subtitle"))
             .activatable(true)
             .build();
 
@@ -509,7 +513,7 @@ impl WebAppView {
     }
 
     fn build_reset_toast() -> Toast {
-        let toast = Toast::new(Self::TOAST_RESET);
+        let toast = Toast::new(&t!("web_apps.web_app_view.toast.reset"));
         toast.set_timeout(Self::TOAST_MESSAGE_TIMEOUT);
 
         toast
@@ -517,7 +521,7 @@ impl WebAppView {
 
     fn build_change_icon_button() -> Button {
         let button_content = ButtonContent::builder()
-            .label("Change icon")
+            .label(t!("web_apps.web_app_view.button.icon"))
             .icon_name("software-update-available-symbolic")
             .build();
 
@@ -526,7 +530,7 @@ impl WebAppView {
 
     fn build_run_app_button(is_new: bool) -> Button {
         Button::builder()
-            .label("Open")
+            .label(t!("web_apps.web_app_view.button.open"))
             .css_classes(["suggested-action", "pill"])
             .visible(!is_new)
             .build()
@@ -534,7 +538,7 @@ impl WebAppView {
 
     fn build_save_button(is_new: bool) -> Button {
         Button::builder()
-            .label("Save")
+            .label(t!("web_apps.web_app_view.button.save"))
             .css_classes(["suggested-action", "pill"])
             .visible(is_new)
             .sensitive(false)
@@ -543,7 +547,7 @@ impl WebAppView {
 
     fn build_delete_button() -> Button {
         let button = Button::builder()
-            .label("Delete")
+            .label(t!("web_apps.web_app_view.button.delete"))
             .css_classes(["destructive-action", "pill", "dimmed"])
             .build();
 
@@ -688,7 +692,7 @@ impl WebAppView {
                 entry_row.set_tooltip_text(None);
             } else {
                 entry_row.set_show_apply_button(false);
-                entry_row.set_tooltip_text(Some("Name is empty"));
+                entry_row.set_tooltip_text(Some(&t!("web_apps.web_app_view.name.validate")));
             }
 
             self_clone.on_validate();
@@ -736,8 +740,7 @@ impl WebAppView {
                 self_clone.change_icon_button.set_sensitive(true);
             } else {
                 entry_row.set_show_apply_button(false);
-                entry_row
-                    .set_tooltip_text(Some("Please enter a valid URL (e.g., https://example.com)"));
+                entry_row.set_tooltip_text(Some(&t!("web_apps.web_app_view.url.validate")));
                 self_clone.change_icon_button.set_sensitive(false);
             }
 

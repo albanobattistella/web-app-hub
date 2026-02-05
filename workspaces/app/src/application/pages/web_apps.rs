@@ -37,7 +37,7 @@ impl NavPage for WebAppsPage {
 }
 impl WebAppsPage {
     pub fn new() -> Rc<Self> {
-        let title = "Web Apps";
+        let title = t!("web_apps.title");
         let icon = "preferences-desktop-apps-symbolic";
         let app_section = RefCell::new(PreferencesGroup::new());
 
@@ -47,7 +47,7 @@ impl WebAppsPage {
             nav_view,
             prefs_page,
             ..
-        } = Self::build_nav_page(title, icon).with_preference_navigation_view();
+        } = Self::build_nav_page(&title, icon).with_preference_navigation_view();
 
         Rc::new(Self {
             nav_page,
@@ -72,7 +72,7 @@ impl WebAppsPage {
 
     fn build_apps_section(self: Rc<Self>, app: &Rc<App>) -> PreferencesGroup {
         let button_content = ButtonContent::builder()
-            .label("New app")
+            .label(t!("web_apps.button.new_app"))
             .icon_name("list-add-symbolic")
             .build();
         let new_app_button = Button::builder()
@@ -110,8 +110,8 @@ impl WebAppsPage {
             Self::get_owned_desktop_files(app);
         if web_app_desktop_files.is_empty() {
             let status_page = StatusPage::builder()
-                .title("No Web Apps found")
-                .description("Try adding one!")
+                .title(t!("web_apps.no_apps.title"))
+                .description(t!("web_apps.no_apps.description"))
                 .icon_name("system-search-symbolic")
                 .build();
 
@@ -139,7 +139,7 @@ impl WebAppsPage {
 
         let app_name = desktop_file_borrow
             .get_name()
-            .unwrap_or("No name".to_string());
+            .unwrap_or(t!("web_apps.no_name").to_string());
         let app_row = ActionRow::builder()
             .title(app_name)
             .activatable(true)

@@ -1,0 +1,132 @@
+_version: 1
+
+home:
+  title: Home
+  get_started: |
+    To get started you may create your first web app.
+    The browser tab show the supported and installed browsers.
+    The info tab shows some tips and tricks + some general information.
+  button:
+    go_to_web_apps: Go to Web Apps
+    more_information: More information
+
+web_apps:
+  title: Web Apps
+  no_apps:
+    title: No web apps found
+    description: Try adding one!
+  no_name: No name
+  button:
+    new_app: New app
+  web_app_view:
+    new_app:
+      title: New web app
+      header:
+        name: No name...
+    name:
+      title: Web app name
+      validate: Name is empty
+    url:
+      title: Website URL
+      validate: Please enter a valid URL (e.g., https://example.com)
+    isolate:
+      title: Isolate
+      subtitle: Use an isolated profile
+      disabled: The selected browser is not capable of isolation
+    maximize:
+      title: Maximize
+      subtitle: Always start the app maximized
+      disabled: The selected browser is not capable of starting maximized
+    browser:
+      title: Browser
+      subtitle: Pick a browser
+      no_browser: No browser
+    optional:
+      title: Optional
+      subtitle: Optional settings for desktops with menus
+      dialog:
+        title: Optional Settings
+        menu_group:
+          title: Menu
+          subtitle: Settings for desktops that use a categorized app menu
+          description:
+            title: Short app description
+          category:
+            title: Category
+            subtitle: Pick a category
+    icon:
+      title: Icons
+      dialog:
+        title: Pick an icon
+        save: Save
+        cancel: Cancel
+      file_dialog:
+        title: Pick an image
+        filter: Images
+      no_icons:
+        title: No icons found
+        description: Try adding one
+      button:
+        reset: Reset
+        add_icon: Add icon
+    button:
+      reset: Reset
+      icon: Change icon
+      open: Open
+      save: Save
+      delete: Delete
+    toast:
+      reset: Reset
+
+browsers:
+  title: Browsers
+  no_browsers:
+    title: No compatible browsers found
+    description: Try installing one!
+  not_installed:
+    title: Supported but not installed
+  capabilities:
+    title: Capabilities
+    isolate: Can isolate your web apps
+    maximize: Can start web apps maximized
+    setup: Setup browser with %{key_bind}
+  issues:
+    title: Known issues
+
+info:
+  title: Info
+  tips:
+    title: Tips & tricks
+    text_pango: |
+      <b>Taskbar icons doesn't match a newly created Web App.</b>
+      The desktop can be slow with updating and matching a newly created Web App. Restart the Web App and it will match with the correct icon.
+
+      <b>Setup browser with isolated profile</b>
+      For Chromium based browsers, right click the title bar and select "Open browser window" or press &lt;Ctrl+T&gt;.
+
+      For Firefox based browsers press &lt;Alt&gt;. Go to `View` and enable `Menu Bar`. This should set Firefox to a somewhat normal mode with menu elements. Disable the `Menu bar` to remove the ui elements again.
+
+      For the Zen browser press &lt;Alt+Ctrl+C&gt;.
+
+      This can be used to setup the browser inside the isolated profile and install extensions.
+
+      <b>Uninstall</b>
+      Uninstalling this app does <b>not</b> remove created Web Apps. Removing this applications app data will remove the icons and isolation profiles of system browsers but Web Apps may still popup on your desktop. To remove all data, delete all Web Apps before deleting this application. This will ensure everything is removed.
+  permissions:
+    title: Permissions
+    text_pango: |
+      <b>filesystem=xdg-data/applications:create</b>
+      Used to create new Web Applications. Usually resolves to ~/.local/share/applications.
+
+      <b>filesystem=~/.var/app:create</b>
+      Used to create isolated profiles for flatpak browsers. For some flatpak browsers it's necessary to create a directory in their sandbox for profile isolation. Also firefox browsers need an updated profile to create a minimal ui. The browser cannot break out of it's own filesystem so this application needs to break in.
+
+      For example the Firefox based browsers don't create the isolated profile directory and will fail when the directory doesn't exist.
+
+      System installed browsers isolated profiles are saved in our own xdg-data/profiles directory.
+
+      <b>filesystem=xdg-data/flatpak/app:ro &amp; filesystem=/var/lib/flatpak/app:ro</b>
+      Used to fetch the icons of the flatpak browsers.
+
+      <b>talk-name=org.freedesktop.Flatpak</b>
+      Used to run commands outside of the sandbox. This is needed to fetch flatpak browser information and to run the created Web App from this application.

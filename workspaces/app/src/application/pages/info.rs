@@ -10,9 +10,6 @@ use libadwaita::{
 };
 use std::rc::Rc;
 
-static GENERAL_PANGO: &str = include_str!("./info/general.pango");
-static PERMISSIONS_PANGO: &str = include_str!("./info/permissions.pango");
-
 pub struct InfoPage {
     nav_page: NavigationPage,
     nav_row: ActionRow,
@@ -31,7 +28,7 @@ impl InfoPage {
     const CONTENT_MARGING: i32 = 12;
 
     pub fn new() -> Rc<Self> {
-        let title = "Info";
+        let title = t!("info.title");
         let icon = "help-about-symbolic";
 
         let PrefPage {
@@ -39,7 +36,7 @@ impl InfoPage {
             nav_row,
             prefs_page,
             ..
-        } = Self::build_nav_page(title, icon).with_preference_page();
+        } = Self::build_nav_page(&title, icon).with_preference_page();
 
         Rc::new(Self {
             nav_page,
@@ -64,7 +61,8 @@ impl InfoPage {
 
     fn build_tips_row() -> ExpanderRow {
         let row = ExpanderRow::builder()
-            .title("Tips &amp; tricks")
+            .title(t!("info.tips.title"))
+            .use_markup(false)
             .expanded(true)
             .build();
         row.add_prefix(&Image::from_icon_name("checkbox-checked-symbolic"));
@@ -80,7 +78,7 @@ impl InfoPage {
         let text_label = Label::builder()
             .use_markup(true)
             .wrap(true)
-            .label(GENERAL_PANGO)
+            .label(t!("info.tips.text_pango"))
             .build();
 
         content_box.append(&text_label);
@@ -90,7 +88,9 @@ impl InfoPage {
     }
 
     fn build_permissions_row() -> ExpanderRow {
-        let row = ExpanderRow::builder().title("Permissions").build();
+        let row = ExpanderRow::builder()
+            .title(t!("info.permissions.title"))
+            .build();
         row.add_prefix(&Image::from_icon_name("security-medium-rtl-symbolic"));
 
         let content_box = gtk::Box::builder()
@@ -104,7 +104,7 @@ impl InfoPage {
         let text_label = Label::builder()
             .use_markup(true)
             .wrap(true)
-            .label(PERMISSIONS_PANGO)
+            .label(t!("info.permissions.text_pango"))
             .build();
 
         content_box.append(&text_label);

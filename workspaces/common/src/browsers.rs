@@ -6,7 +6,13 @@ use crate::{
 use anyhow::{Context, Result, bail};
 use freedesktop_desktop_entry::DesktopEntry;
 use gtk::{IconTheme, Image};
-use std::{cell::OnceCell, collections::HashSet, fs, path::Path, rc::Rc};
+use std::{
+    cell::OnceCell,
+    collections::{HashMap, HashSet},
+    fs,
+    path::Path,
+    rc::Rc,
+};
 use std::{fmt::Write as _, path::PathBuf};
 use tracing::{debug, error, info};
 
@@ -45,7 +51,7 @@ pub struct BrowserYaml {
     desktop_file_name_prefix: String,
     base: String,
     #[serde(default)]
-    issues: Vec<String>,
+    issues: HashMap<String, Vec<String>>,
 }
 
 struct BrowserConfig {
@@ -66,7 +72,7 @@ pub struct Browser {
     pub desktop_file: DesktopEntry,
     pub desktop_file_name_prefix: String,
     pub base: Base,
-    pub issues: Vec<String>,
+    pub issues: HashMap<String, Vec<String>>,
     pub config_name: String,
     configs: Rc<BrowserConfigs>,
     icon_theme: Rc<IconTheme>,
@@ -131,6 +137,14 @@ impl Browser {
 
     pub fn is_installed(&self) -> bool {
         !matches!(self.installation, Installation::None)
+    }
+
+    pub fn is_no_browser(&self) -> bool {
+        self.name == BrowserConfigs::NO_BROWSER_NAME
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
     }
 
     pub fn get_name_with_installation(&self) -> String {
@@ -249,6 +263,8 @@ pub struct BrowserConfigs {
     app_dirs: Rc<AppDirs>,
 }
 impl BrowserConfigs {
+    pub const NO_BROWSER_NAME: &str = "No browser";
+
     pub fn new(icon_theme: &Rc<IconTheme>, app_dirs: &Rc<AppDirs>) -> Rc<Self> {
         Rc::new(Self {
             all_browsers: OnceCell::new(),
@@ -317,7 +333,7 @@ impl BrowserConfigs {
     fn get_no_browser(self: &Rc<Self>) -> Browser {
         Browser {
             id: String::default(),
-            name: "No browser".to_string(),
+            name: Self::NO_BROWSER_NAME.to_string(),
             installation: Installation::None,
             can_isolate: false,
             can_start_maximized: false,
@@ -329,7 +345,7 @@ impl BrowserConfigs {
             configs: self.clone(),
             icon_names: HashSet::from(["dialog-warning-symbolic".to_string()]),
             base: Base::None,
-            issues: Vec::new(),
+            issues: HashMap::new(),
             icon_theme: self.icon_theme.clone(),
             app_dirs: self.app_dirs.clone(),
         }

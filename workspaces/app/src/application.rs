@@ -1,3 +1,4 @@
+mod css_provider;
 mod error_dialog;
 mod pages;
 mod window;
@@ -19,11 +20,17 @@ use std::{cell::RefCell, path::Path, rc::Rc};
 use tracing::{debug, error};
 use window::AppWindow;
 
+pub struct Locale {
+    current: String,
+    default: String,
+}
+
 pub struct App {
     pub cache_settings: RefCell<CacheSettings>,
     pub dirs: Rc<AppDirs>,
     pub browser_configs: Rc<BrowserConfigs>,
     pub error_dialog: ErrorDialog,
+    pub locale: Locale,
     adw_application: libadwaita::Application,
     icon_theme: Rc<IconTheme>,
     window: AppWindow,
@@ -34,9 +41,8 @@ pub struct App {
 impl App {
     pub fn new(adw_application: &libadwaita::Application) -> Rc<Self> {
         Rc::new({
-            let icon_theme = Rc::new(IconTheme::for_display(
-                &gdk::Display::default().expect("Failed to connect to display"),
-            ));
+            let display = gdk::Display::default().expect("Failed to connect to display");
+            let icon_theme = Rc::new(IconTheme::for_display(&display));
             let app_dirs = AppDirs::new().expect("Failed to get all needed directories");
             let settings = Settings::default().expect("Failed to load gtk settings");
             let cache_settings = RefCell::new(CacheSettings::new(&app_dirs));
@@ -45,14 +51,20 @@ impl App {
             let pages = Pages::new();
             let browsers = BrowserConfigs::new(&icon_theme, &app_dirs);
             let error_dialog = ErrorDialog::new();
+            let locale = Locale {
+                current: rust_i18n::locale().to_string(),
+                default: "en".to_string(),
+            };
 
             Self::set_theme_settings(&settings);
+            css_provider::init(&display);
 
             Self {
                 cache_settings,
                 dirs: app_dirs,
                 browser_configs: browsers,
                 error_dialog,
+                locale,
                 adw_application: adw_application.clone(),
                 icon_theme,
                 window,

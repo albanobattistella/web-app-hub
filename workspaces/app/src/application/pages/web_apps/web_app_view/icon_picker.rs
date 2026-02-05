@@ -132,12 +132,18 @@ impl IconPicker {
         self.init();
 
         let dialog = AlertDialog::builder()
-            .heading("Pick an icon")
+            .heading(t!("web_apps.web_app_view.icon.dialog.title"))
             .width_request(500)
             .extra_child(&self.content_box)
             .build();
-        dialog.add_response(Self::DIALOG_CANCEL, "_Cancel");
-        dialog.add_response(Self::DIALOG_SAVE, "_Save");
+        dialog.add_response(
+            Self::DIALOG_CANCEL,
+            &t!("web_apps.web_app_view.icon.dialog.cancel"),
+        );
+        dialog.add_response(
+            Self::DIALOG_SAVE,
+            &t!("web_apps.web_app_view.icon.dialog.save"),
+        );
         dialog.set_response_appearance(Self::DIALOG_SAVE, ResponseAppearance::Suggested);
         dialog.set_default_response(Some(Self::DIALOG_CANCEL));
         dialog.set_close_response(Self::DIALOG_CANCEL);
@@ -396,7 +402,7 @@ impl IconPicker {
         debug!("Opening file picker");
 
         let file_filter = FileFilter::new();
-        file_filter.set_name(Some("Images"));
+        file_filter.set_name(Some(&t!("web_apps.web_app_view.icon.file_dialog.filter")));
         let mimetypes: Vec<GString> = Pixbuf::formats()
             .iter()
             .flat_map(PixbufFormat::mime_types)
@@ -406,7 +412,7 @@ impl IconPicker {
         }
 
         let file_dialog = FileDialog::builder()
-            .title("Pick an image")
+            .title(t!("web_apps.web_app_view.icon.file_dialog.title"))
             .default_filter(&file_filter)
             .build();
 
@@ -422,7 +428,7 @@ impl IconPicker {
                     return;
                 };
                 let Some(path) = file.path() else {
-                    error!("Could not get path");
+                    error!("Failed to get path");
                     return;
                 };
                 let filename = file.parse_name().to_string();
@@ -494,7 +500,7 @@ impl IconPicker {
 
     fn build_pref_group_icons() -> (PreferencesGroup, Button) {
         let content = ButtonContent::builder()
-            .label("Reset")
+            .label(t!("web_apps.web_app_view.icon.button.reset"))
             .icon_name("folder-download-symbolic")
             .build();
         let button = Button::builder()
@@ -503,7 +509,7 @@ impl IconPicker {
             .build();
 
         let pref_group = PreferencesGroup::builder()
-            .title("Icons")
+            .title(t!("web_apps.web_app_view.icon.title"))
             .header_suffix(&button)
             .build();
 
@@ -512,7 +518,7 @@ impl IconPicker {
 
     fn build_pref_row_add_icon() -> ButtonRow {
         ButtonRow::builder()
-            .title("Add icon")
+            .title(t!("web_apps.web_app_view.icon.button.add_icon"))
             .start_icon_name("list-add-symbolic")
             .build()
     }
@@ -535,8 +541,8 @@ impl IconPicker {
 
     fn build_pref_row_icons_fail() -> PreferencesRow {
         let status_page = StatusPage::builder()
-            .title("No icons found")
-            .description("Try adding one")
+            .title(t!("web_apps.web_app_view.icon.no_icons.title"))
+            .description(t!("web_apps.web_app_view.icon.no_icons.description"))
             .css_classes(["compact"])
             .build();
 
