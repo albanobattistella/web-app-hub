@@ -1,3 +1,4 @@
+mod about;
 mod app_menu;
 mod sidebar_page;
 
@@ -10,7 +11,9 @@ use gtk::{
     Button,
     prelude::{ButtonExt, WidgetExt},
 };
-use libadwaita::{Breakpoint, BreakpointCondition, NavigationSplitView, glib::Value};
+use libadwaita::{
+    Breakpoint, BreakpointCondition, NavigationSplitView, glib::Value, prelude::AdwDialogExt,
+};
 use sidebar_page::SidebarPage;
 use std::rc::Rc;
 
@@ -22,7 +25,7 @@ pub struct View {
     pub updated_button: Button,
 }
 impl View {
-    pub fn new() -> Self {
+    pub fn new() -> Rc<Self> {
         let sidebar = SidebarPage::new();
         let app_menu = AppMenu::new();
         let nav_split = NavigationSplitView::builder()
@@ -33,16 +36,16 @@ impl View {
         let breakpoint = Self::build_breakpoint();
         let updated_button = Self::build_updated_button();
 
-        Self {
+        Rc::new(Self {
             app_menu,
             sidebar,
             nav_split,
             breakpoint,
             updated_button,
-        }
+        })
     }
 
-    pub fn init(&self, app: &Rc<App>) {
+    pub fn init(self: &Rc<Self>, app: &Rc<App>) {
         self.app_menu.init(app);
         self.sidebar.header.pack_end(&self.app_menu.button);
         self.sidebar.header.pack_start(&self.updated_button);
@@ -51,15 +54,20 @@ impl View {
         self.connect_updated_button(app);
     }
 
-    pub fn navigate(&self, app: &Rc<App>, page: &Page) {
+    pub fn navigate(self: &Rc<Self>, app: &Rc<App>, page: &Page) {
         let nav_page = app.pages.get(page);
         nav_page.load_page(&self.nav_split);
         app.window.view.nav_split.set_show_content(true);
         app.window.view.sidebar.select_nav_row(app, page);
     }
 
-    pub fn on_app_update(&self) {
+    pub fn on_app_update(self: &Rc<Self>) {
         self.updated_button.set_visible(true);
+    }
+
+    pub fn show_about(app: &Rc<App>) {
+        let about = about::get_dialog();
+        about.present(Some(&app.window.adw_window));
     }
 
     fn build_breakpoint() -> Breakpoint {
@@ -81,11 +89,11 @@ impl View {
             .build()
     }
 
-    fn connect_updated_button(&self, app: &Rc<App>) {
+    fn connect_updated_button(self: &Rc<Self>, app: &Rc<App>) {
         let app_clone = app.clone();
 
         self.updated_button.connect_clicked(move |button| {
-            app_clone.window.show_about();
+            View::show_about(&app_clone);
             button.set_visible(false);
         });
     }

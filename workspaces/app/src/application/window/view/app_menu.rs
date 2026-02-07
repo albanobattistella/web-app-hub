@@ -1,4 +1,4 @@
-use crate::application::App;
+use crate::application::{App, window::view::View};
 use common::{
     assets,
     config::{self},
@@ -62,9 +62,12 @@ impl AppMenu {
     fn build_about(&self, app: &Rc<App>) -> MenuItem {
         let app_clone = app.clone();
         self.build_menu_item(
-            "About",
+            &t!(
+                "app_menu.about.title",
+                app_name = config::APP_NAME.get_value()
+            ),
             ("about", move || {
-                app_clone.window.show_about();
+                View::show_about(&app_clone);
             }),
         )
     }
@@ -72,21 +75,18 @@ impl AppMenu {
     fn build_reset(&self, app: &Rc<App>) -> MenuItem {
         let app_clone = app.clone();
         self.build_menu_item(
-            "Reset app",
+            &t!("app_menu.reset.title"),
             ("reset_app", move || {
                 let dialog_ok = "ok";
                 let dialog_cancel = "cancel";
 
                 let dialog = AlertDialog::builder()
                     .heading(format!("Reset {}?", config::APP_NAME.get_value()))
-                    .body(
-                        "This will reset the config files (e.g.: browser configs).\n\n\
-                        It will not remove your create web apps.",
-                    )
+                    .body(t!("app_menu.reset.dialog.text"))
                     .build();
 
-                dialog.add_response(dialog_cancel, "Cancel");
-                dialog.add_response(dialog_ok, "I understand");
+                dialog.add_response(dialog_cancel, &t!("app_menu.reset.dialog.cancel"));
+                dialog.add_response(dialog_ok, &t!("app_menu.reset.dialog.ok"));
                 dialog.set_response_appearance(dialog_cancel, ResponseAppearance::Suggested);
                 dialog.set_default_response(Some(dialog_cancel));
                 dialog.set_close_response(dialog_cancel);

@@ -130,3 +130,26 @@ info:
 
       <b>talk-name=org.freedesktop.Flatpak</b>
       Wordt gebruikt om opdrachten buiten de sandbox uit te voeren. Dit is nodig om informatie over Flatpak-browsers op te halen en om de aangemaakte webapp vanuit deze applicatie te starten.
+
+about:
+  changelog: Wat is er nieuw
+  details: Details
+  website: Website
+  support: Ondersteuningsvragen
+  issue: Een probleem melden
+  troubleshooting: Probleemoplossing
+  credits: Met dank aan
+  legal: Juridisch
+  acknowledgements: Dankbetuigingen
+
+app_menu:
+  about:
+    title: Over %{app_name}
+  reset:
+    title: Reset app
+    dialog:
+      ok: Ik begrijp het
+      cancel: Annuleren
+      text: |
+        Dit zal de configuratiebestanden resetten (bijv.: browserconfiguraties).
+        Het zal je gemaakte webapps niet verwijderen.
