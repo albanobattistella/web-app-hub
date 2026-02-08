@@ -54,6 +54,20 @@ web_apps:
           category:
             title: Category
             subtitle: Pick a category
+            categories:
+              audio_video: Multimedia
+              audio: Audio
+              video: Video
+              development: Development
+              education: Education
+              game: Game
+              graphics: Graphics
+              network: Network / Internet
+              office: Office
+              science: Science
+              settings: Settings
+              system: System
+              utility: Utility
     icon:
       title: Icons
       dialog:

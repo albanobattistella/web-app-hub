@@ -1,6 +1,5 @@
-use std::fmt::Display;
-
 use gtk::Image;
+use std::fmt::Display;
 
 /// <https://specifications.freedesktop.org/menu/latest/category-registry.html>
 #[derive(Copy, Clone, PartialEq)]
@@ -39,25 +38,6 @@ impl Display for Category {
     }
 }
 impl Category {
-    #[allow(clippy::wrong_self_convention)]
-    pub fn to_string_ui(&self) -> &str {
-        match self {
-            Self::AudioVideo => "Multimedia",
-            Self::Audio => "Audio",
-            Self::Video => "Video",
-            Self::Development => "Development",
-            Self::Education => "Education",
-            Self::Game => "Game",
-            Self::Graphics => "Graphics",
-            Self::Network => "Network / Internet",
-            Self::Office => "Office",
-            Self::Science => "Science",
-            Self::Settings => "Settings",
-            Self::System => "System",
-            Self::Utility => "Utility",
-        }
-    }
-
     pub fn get_all() -> [Category; 13] {
         let list: [Category; 13] = [
             Self::AudioVideo,

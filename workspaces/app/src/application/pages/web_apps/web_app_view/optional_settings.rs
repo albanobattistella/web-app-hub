@@ -129,7 +129,7 @@ impl OptionalSettings {
             let icon = category.get_icon();
 
             box_container.append(&icon);
-            box_container.append(&Label::new(Some(category.to_string_ui())));
+            box_container.append(&Label::new(Some(&Self::category_to_string_ui(*category))));
 
             list_item.set_child(Some(&box_container));
         });
@@ -161,6 +161,63 @@ impl OptionalSettings {
         }
 
         combo_row
+    }
+
+    pub fn category_to_string_ui(category: Category) -> String {
+        match category {
+            Category::AudioVideo => t!(
+                "web_apps.web_app_view.optional.dialog.menu_group.category.categories.audio_video"
+            )
+            .to_string(),
+            Category::Audio => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.audio")
+                    .to_string()
+            }
+            Category::Video => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.video")
+                    .to_string()
+            }
+            Category::Development => t!(
+                "web_apps.web_app_view.optional.dialog.menu_group.category.categories.development"
+            )
+            .to_string(),
+            Category::Education => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.education")
+                    .to_string()
+            }
+            Category::Game => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.game")
+                    .to_string()
+            }
+            Category::Graphics => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.graphics")
+                    .to_string()
+            }
+            Category::Network => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.network")
+                    .to_string()
+            }
+            Category::Office => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.office")
+                    .to_string()
+            }
+            Category::Science => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.science")
+                    .to_string()
+            }
+            Category::Settings => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.settings")
+                    .to_string()
+            }
+            Category::System => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.system")
+                    .to_string()
+            }
+            Category::Utility => {
+                t!("web_apps.web_app_view.optional.dialog.menu_group.category.categories.utility")
+                    .to_string()
+            }
+        }
     }
 
     fn connect_description_row(self: &Rc<Self>, web_app_view: &Rc<WebAppView>) {

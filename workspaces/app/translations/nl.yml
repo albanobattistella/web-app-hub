@@ -54,6 +54,21 @@ web_apps:
           category:
             title: Categorie
             subtitle: Selecteer een categorie
+            categories:
+              audio_video: Multimedia
+              audio: Audio
+              video: Video
+              development: Ontwikkeling
+              education: Onderwijs
+              game: Spellen
+              graphics: Grafisch
+              network: Netwerk / Internet
+              office: Kantoor
+              science: Wetenschap
+              settings: Instellingen
+              system: Systeem
+              utility: Hulpmiddelen
+
     icon:
       title: Iconen
       dialog:
