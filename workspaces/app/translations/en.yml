@@ -132,17 +132,6 @@ info:
       <b>talk-name=org.freedesktop.Flatpak</b>
       Used to run commands outside of the sandbox. This is needed to fetch flatpak browser information and to run the created Web App from this application.
 
-about:
-  changelog: What’s New
-  details: Details
-  website: Website
-  support: Support Questions
-  issue: Report an Issue
-  troubleshooting: Troubleshooting
-  credits: Credits
-  legal: Legal
-  acknowledgements: Acknowledgements
-
 app_menu:
   about:
     title: About %{app_name}
